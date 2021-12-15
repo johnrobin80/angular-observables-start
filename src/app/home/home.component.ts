@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from "@angular/core";
 import { interval, Observable, Subscription } from "rxjs";
-import { timeout } from "rxjs-compat/operator/timeout";
+import { map, filter } from "rxjs/operators";
+// import { timeout } from "rxjs-compat/operator/timeout";
 
 @Component({
   selector: "app-home",
@@ -9,6 +10,7 @@ import { timeout } from "rxjs-compat/operator/timeout";
 })
 export class HomeComponent implements OnInit, OnDestroy {
   private firstObsSubscription: Subscription;
+  count: number | any;
   constructor() {}
 
   ngOnInit() {
@@ -16,15 +18,42 @@ export class HomeComponent implements OnInit, OnDestroy {
     //   console.log(count);
     // });
     const customIntervalObservable = new Observable((observer) => {
-      let count = 0;
+      this.count = 0;
       setInterval(() => {
-        observer.next(count);
-        count++;
-      }, 1000);
+        observer.next(this.count);
+        if (this.count === 2) {
+          observer.complete();
+          this.count = 0;
+        }
+        if (this.count > 3) {
+          observer.error(new Error("Count is greater than 3!!!!!"));
+          this.count = 0;
+        }
+        this.count++;
+      }, 3000);
     });
-    this.firstObsSubscription = customIntervalObservable.subscribe((data) => {
-      console.log(data);
-    });
+
+    this.firstObsSubscription = customIntervalObservable
+      .pipe(
+        filter((data) => {
+          return data > 0;
+        }),
+        map((data: number) => {
+          return "Round: " + (data + 1);
+        })
+      )
+      .subscribe(
+        (data) => {
+          // console.log("Round : " + data);
+          console.log(data);
+        },
+        (error) => {
+          alert(error.message);
+        },
+        () => {
+          console.log("Completed!!!!");
+        }
+      );
   }
 
   ngOnDestroy(): void {
