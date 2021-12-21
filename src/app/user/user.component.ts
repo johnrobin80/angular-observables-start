@@ -9,6 +9,7 @@ import { UserService } from "../user.service";
 })
 export class UserComponent implements OnInit {
   id: number;
+  vat: boolean | any = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -21,7 +22,14 @@ export class UserComponent implements OnInit {
     });
   }
   onActivate() {
-    this.userService.activatedEmitter.emit(true);
-    // alert("true");
+    // this.userService.activatedEmitter.emit(true);
+
+    if (this.vat === true) {
+      this.vat = false;
+    } else {
+      this.vat = true;
+    }
+    this.userService.activatedEmitter.next(this.vat);
+    // alert(this.vat);
   }
 }
